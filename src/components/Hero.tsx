@@ -17,7 +17,7 @@ export function Hero() {
               AI meets <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Crypto</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Discover the best lending rates across Solana protocols, powered by advanced AI analytics
+              Discover the best lending rates across Solana protocols, powered by Ultra AI analytics
             </p>
             <div className="flex justify-center gap-4">
               <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold hover:opacity-90 transition">
