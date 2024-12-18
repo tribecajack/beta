@@ -20,9 +20,12 @@ export function Hero() {
               Discover the best lending rates across Solana protocols, powered by Ultra AI analytics
             </p>
             <div className="flex justify-center gap-4">
-              <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold hover:opacity-90 transition">
+              <a 
+                href="https://deposit-now.vercel.app"
+                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold hover:opacity-90 transition inline-block"
+              >
                 Get Started
-              </button>
+              </a>
               <button className="px-8 py-3 border border-white/20 rounded-lg font-semibold hover:bg-white/10 transition">
                 Learn More
               </button>
