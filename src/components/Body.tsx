@@ -21,7 +21,7 @@ export function Body() {
             </p>
             <div className="flex justify-center gap-4">
               <a 
-                href="https://deposit-now.vercel.app"
+                href="https://app.ultra.markets"
                 className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold hover:opacity-90 transition inline-block"
               >
                 Get Started
