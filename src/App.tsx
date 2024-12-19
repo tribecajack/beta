@@ -1,12 +1,12 @@
 import React from 'react';
-import { Hero } from './components/Hero';
+import { Body } from './components/Body';
 import { Features } from './components/Features';
 import { RateComparison } from './components/RateComparison';
 
 function App() {
   return (
     <div className="min-h-screen bg-black">
-      <Hero />
+      <Body />
       <Features />
       <RateComparison />
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Brain, Coins, TrendingUp } from 'lucide-react';
 
-export function Hero() {
+export function Body() {
   return (
     <div className="relative overflow-hidden bg-black text-white">
       <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 via-black to-black z-0" />
@@ -35,4 +35,4 @@ export function Hero() {
       </div>
     </div>
   );
-}
+} 
