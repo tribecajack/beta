@@ -106,7 +106,7 @@ export function RateComparison() {
     };
 
     fetchProtocolRates();
-    const interval = setInterval(fetchProtocolRates, 60000);
+    const interval = setInterval(fetchProtocolRates, 30000);
     
     return () => clearInterval(interval);
   }, []);
