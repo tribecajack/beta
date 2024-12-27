@@ -9,7 +9,7 @@ interface Protocol {
   recommended: boolean;
 }
 
-const API_URL = '/api/protocolRates';
+const API_URL = '/api/rates';
 
 export function RateComparison() {
   const [protocols, setProtocols] = useState<Protocol[]>([]);
@@ -19,20 +19,46 @@ export function RateComparison() {
   useEffect(() => {
     const fetchProtocolRates = async () => {
       try {
+        // First try to check if the API is reachable
+        const healthCheck = await fetch('/api/health').catch(() => null);
+        if (healthCheck?.ok) {
+          console.log('API health check passed');
+        } else {
+          console.warn('API health check failed, attempting main request anyway');
+        }
+
         const response = await fetch(API_URL, {
           headers: {
             'Accept': 'application/json',
-          }
+            'Content-Type': 'application/json',
+          },
         });
         
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('API did not return JSON data');
-        }
+        console.log('Response details:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries()),
+          url: response.url
+        });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorText = await response.text();
+          console.error('Failed request details:', {
+            endpoint: API_URL,
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            error: errorText,
+            url: response.url
+          });
+          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
         }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error(`Unexpected content type: ${contentType}`);
+        }
+
         const data = await response.json();
         console.log("Raw API Response:", data);
         
