@@ -19,14 +19,6 @@ export function RateComparison() {
   useEffect(() => {
     const fetchProtocolRates = async () => {
       try {
-        // First try to check if the API is reachable
-        const healthCheck = await fetch('/api/health').catch(() => null);
-        if (healthCheck?.ok) {
-          console.log('API health check passed');
-        } else {
-          console.warn('API health check failed, attempting main request anyway');
-        }
-
         const response = await fetch(API_URL, {
           headers: {
             'Accept': 'application/json',

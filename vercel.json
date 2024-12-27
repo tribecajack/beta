@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/health",
+      "destination": "https://api.ultra.markets/health"
+    },
+    {
       "source": "/api/rates",
       "destination": "https://api.ultra.markets/protocolRates"
     },
