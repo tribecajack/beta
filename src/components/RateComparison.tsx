@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, Shield, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, Shield } from 'lucide-react';
 
 interface Protocol {
   name: string;
@@ -9,9 +9,30 @@ interface Protocol {
   recommended: boolean;
 }
 
-const API_URL = '/api/rates';
+interface ProviderResp {
+  id: string,
+  name: string,
+  last_updated: string,
+  reserves: {
+      symbol: string,
+      decimals: number,
+      mint: string,
+      tvl: number,
+      volume: number,
+      vault_deposit_risk: number, // not implemented
+      price: number, 
+      apy: number, // deposit yield rate
+      apr: number // borrow interest rate
+  }[]
+}
+
+const API_URL = 'https://api.ultra.markets/providers/';
 
 export function RateComparison() {
+  const toFetch = [
+    "0",
+    ""
+  ]
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,62 +40,66 @@ export function RateComparison() {
   useEffect(() => {
     const fetchProtocolRates = async () => {
       try {
-        const response = await fetch(API_URL, {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
+        const responses = await Promise.all(toFetch.map(async (id) => {
+          const response = await fetch(API_URL + id, {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+          });
         
-        console.log('Response details:', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries()),
-          url: response.url
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Failed request details:', {
-            endpoint: API_URL,
+          console.log('Response details:', {
             status: response.status,
             statusText: response.statusText,
             headers: Object.fromEntries(response.headers.entries()),
-            error: errorText,
             url: response.url
           });
-          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
-        }
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error(`Unexpected content type: ${contentType}`);
-        }
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Failed request details:', {
+              endpoint: API_URL,
+              status: response.status,
+              statusText: response.statusText,
+              headers: Object.fromEntries(response.headers.entries()),
+              error: errorText,
+              url: response.url
+            });
+            throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+          }
 
-        const data = await response.json();
-        console.log("Raw API Response:", data);
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Unexpected content type: ${contentType}`);
+          }
+
+          const data = await response.json();
+          return data;
+        }));
+        
+        const data = responses
         
         if (!Array.isArray(data)) {
           console.error("API response is not an array:", data);
           throw new Error("Invalid API response format");
         }
 
-        const validatedData: Protocol[] = data.map((item: any, index: number) => {
+        const validatedData: Protocol[] = data.map((item: ProviderResp, index: number) => {
           console.log("Processing item:", item);
           // Get USDC rate directly from token_rates
-          const tokenRates = item.token_rates || {};
-          const usdcRate = tokenRates.usdc || 0;
+          const tokenRates = item.reserves;
+          const usdcRate = tokenRates.find((r) => r.symbol == "USDC")!;
           
           return {
-            name: formatProtocolName(item.protocol_name) || `Unknown Protocol ${index + 1}`,
-            apy: typeof usdcRate === 'number' 
-              ? `${usdcRate.toFixed(2)}%`  // No need to multiply by 100 as it's already a percentage
+            name: formatProtocolName(item.name) || `Unknown Protocol ${index + 1}`,
+            apy: typeof usdcRate === 'object' 
+              ? `${usdcRate.apy.toFixed(2)}%`  // No need to multiply by 100 as it's already a percentage
               : '0%',
-            tvl: typeof tokenRates.tvl === 'number' 
-              ? `$${(tokenRates.tvl / 1000000).toFixed(1)}M` 
+            tvl: typeof usdcRate.tvl === 'number' 
+              ? `$${(usdcRate.tvl / 1000000).toFixed(1)}M` 
               : '$0M',
-            risk: determineRiskLevel(usdcRate),
-            recommended: determineIfRecommended(usdcRate, tokenRates.tvl)
+            risk: determineRiskLevel(usdcRate.apy),
+            recommended: determineIfRecommended(usdcRate.apy)
           };
         });
 
@@ -92,7 +117,7 @@ export function RateComparison() {
           return 'High';
         }
 
-        function determineIfRecommended(apy: number, tvl: number): boolean {
+        function determineIfRecommended(apy: number): boolean {
           // Recommend protocols with APY > 8%
           return apy > 8;
         }
