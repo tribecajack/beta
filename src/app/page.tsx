@@ -1,7 +1,7 @@
 import React from 'react';
-import { Body } from './components/Body';
-import { Features } from './components/Features';
-import { RateComparison } from './components/RateComparison';
+import { Body } from '@/components/Body';
+import { Features } from '@/components/Features';
+import { RateComparison } from '@/components/RateComparison';
 
 function App() {
   return (
