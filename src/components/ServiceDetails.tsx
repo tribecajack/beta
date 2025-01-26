@@ -12,7 +12,7 @@ export function ServiceDetails({ service }: { service: ServiceDetailsType }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-4">Last successful ping: {new Date(service.last_successful_ping).toLocaleString()}</p>
+        <p className="mb-4">Last successful ping: {new Date(service.last_successful_ping).toLocaleString()} UTC</p>
         <h4 className="font-semibold mb-2">Outages:</h4>
         {(service?.outages?.length ?? 0) === 0 ? (
           <p>No outages reported.</p>
