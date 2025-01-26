@@ -94,15 +94,23 @@ export function RateComparison() {
           const tokenRates = item.reserves;
           const usdcRate = tokenRates.find((r) => r.symbol == "USDC")!;
           
+          let risk: "Low" | "Medium" | "High";
+          if (usdcRate.vault_deposit_risk < 0.33)
+            risk = "Low"
+          else if (usdcRate.vault_deposit_risk < 0.66)
+            risk = "Medium"
+          else
+            risk = "High"
+          
           return {
             name: formatProtocolName(item.name) || `Unknown Protocol ${index + 1}`,
             apy: typeof usdcRate === 'object' 
-              ? `${usdcRate.apy.toFixed(2)}%`  // No need to multiply by 100 as it's already a percentage
+              ? `${(usdcRate.apy * 100).toFixed(2)}%`  // No need to multiply by 100 as it's already a percentage
               : '0%',
             tvl: typeof usdcRate.tvl === 'number' 
               ? `$${(usdcRate.tvl / 1000000).toFixed(1)}M` 
               : '$0M',
-            risk: determineRiskLevel(usdcRate.apy),
+            risk,
             recommended: determineIfRecommended(usdcRate.apy)
           };
         });
@@ -115,15 +123,9 @@ export function RateComparison() {
             .join(' ');
         }
 
-        function determineRiskLevel(apy: number): Protocol['risk'] {
-          if (apy <= 5) return 'Low';
-          if (apy <= 10) return 'Medium';
-          return 'High';
-        }
-
         function determineIfRecommended(apy: number): boolean {
-          // Recommend protocols with APY > 8%
-          return apy > 8;
+          // Recommend protocols with APY > 7%
+          return apy > 7;
         }
 
         console.log("Final Validated Data:", validatedData);
@@ -153,7 +155,7 @@ export function RateComparison() {
     };
 
     fetchProtocolRates();
-    const interval = setInterval(fetchProtocolRates, 30000);
+    const interval = setInterval(fetchProtocolRates, 300000);
     
     return () => clearInterval(interval);
   }, []);
