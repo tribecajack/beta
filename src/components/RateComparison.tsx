@@ -45,6 +45,7 @@ export function RateComparison() {
     const fetchProtocolRates = async () => {
       try {
         const responses = await Promise.all(toFetch.map(async (id) => {
+          if (!id) return;
           const response = await fetch(API_URL + id, {
             headers: {
               'Accept': 'application/json',
@@ -78,6 +79,9 @@ export function RateComparison() {
           }
 
           const data = await response.json();
+          if (!data || !data?.reserves) {
+            return;
+          }
           return data;
         }));
         
