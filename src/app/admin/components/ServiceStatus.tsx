@@ -19,8 +19,8 @@ export function ServiceStatus({ service }: ServiceStatusProps) {
       </div>
       <Progress value={service.uptime ?? 0} className="h-1.5" />
       <div className="flex justify-between text-sm text-muted-foreground">
-        <span>Requests: {formatNumber(service.requests)}</span>
-        <span>Errors: {service.errors ?? 0}%</span>
+        <span>Requests: {formatNumber(service.req_count)}</span>
+        <span>Errors: {service.err_count ?? 0 / service.req_count ?? 0}%</span>
       </div>
     </div>
   )

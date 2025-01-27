@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { RefreshCw, Server, Activity, HardDrive, Cpu } from "lucide-react"
+import { RefreshCw, Server, Activity, HardDrive } from "lucide-react"
+
 
 export default function HealthDashboard() {
   const [services, setServices] = useState<Service[]>([])
@@ -26,7 +27,7 @@ export default function HealthDashboard() {
       const data = await fetchAllServices()
       setServices(await data.json())
       setError(null)
-    } catch (err) {
+    } catch  {
       setError("Failed to fetch services")
     } finally {
       setLoading(false)
@@ -39,7 +40,7 @@ export default function HealthDashboard() {
       const data = await fetchServiceDetails(id).then((res) => res.json())
       setSelectedService(data)
       setError(null)
-    } catch (err) {
+    } catch {
       setError("Failed to fetch service details")
     } finally {
       setLoading(false)
@@ -48,12 +49,10 @@ export default function HealthDashboard() {
 
   const getStatusVariant = (status: Service["status"]) => {
     switch (status) {
-      case "up":
+      case "OK":
         return "default"
-      case "down":
+      case "FAILED":
         return "destructive"
-      case "degraded":
-        return "secondary"
       default:
         return "default"
     }
@@ -113,7 +112,6 @@ export default function HealthDashboard() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="text-xl">{selectedService.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">Version {selectedService.version}</p>
                   </div>
                   <Badge variant={getStatusVariant(selectedService.status)} className="text-sm">
                     {selectedService.status}
@@ -129,17 +127,17 @@ export default function HealthDashboard() {
                       <div className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Uptime</span>
-                          <span>{selectedService.uptime ?? 0}%</span>
+                          <span>{selectedService.uptime.toFixed(0)}s</span>
                         </div>
                         <Progress value={selectedService.uptime ?? 0} className="h-2" />
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Total Requests</span>
-                        <span>{formatNumber(selectedService.requests)}</span>
+                        <span>{formatNumber(selectedService.req_count)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Error Rate</span>
-                        <span>{selectedService.errors ?? 0}%</span>
+                        <span className="text-muted-foreground">Outages</span>
+                        <span>{selectedService.outages?.length ?? 0}</span>
                       </div>
                     </div>
 
@@ -151,15 +149,15 @@ export default function HealthDashboard() {
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Memory Usage</span>
-                          <span>{selectedService.memory ?? 0} MB</span>
+                          <span>{selectedService?.usage?.[0]?.mem.toFixed(2) ?? 0} MB</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">CPU Usage</span>
-                          <span>{selectedService.cpu ?? 0}%</span>
+                          <span>{((selectedService?.usage?.[0]?.cpu ?? 0) * 100).toFixed(2)}%</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Last Updated</span>
-                          <span>{selectedService.lastCheck ? new Date(selectedService.lastCheck).toLocaleString() : 'Never'}</span>
+                          <span>{selectedService.last_successful_ping ? new Date(selectedService.last_successful_ping).toLocaleString() : 'Never'}</span>
                         </div>
                       </div>
                     </div>
@@ -175,18 +173,22 @@ export default function HealthDashboard() {
                             className="flex items-center justify-between p-2 rounded-md bg-muted/50"
                           >
                             <span className="text-sm">{dep.name}</span>
-                            <Badge variant={getStatusVariant(dep.status)}>{dep.status}</Badge>
+                            <Badge variant={dep.healthy ? "default" : "destructive"}>{dep.healthy ? "Ok" : "Down"}</Badge>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {selectedService.logs && selectedService.logs.length > 0 && (
+                  {selectedService.errors && selectedService.errors.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Recent Logs</h3>
+                      <h3 className="text-sm font-medium mb-2">Recent Error Logs</h3>
                       <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto max-h-48">
-                        {selectedService.logs.join("\n")}
+                        {
+                          selectedService.errors
+                            .map(err => err.createdAt.toLocaleString() + " - "  + err.message)
+                            .join("\n")
+                        }
                       </pre>
                     </div>
                   )}
