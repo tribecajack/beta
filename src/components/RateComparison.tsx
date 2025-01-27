@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Shield } from 'lucide-react';
 
 interface Protocol {
@@ -31,12 +31,12 @@ interface ProviderResp {
 const API_URL = 'https://api.ultra.markets/providers/';
 
 export function RateComparison() {
-  const toFetch = [
+  const toFetch = useMemo(() => [
     "0",
     "MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA",
     "4UpD2fh7xH3VP9QQaXtsS1YY3bxzWhtfpks7FatyKvdY",
     "7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF"
-  ]
+  ], []);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -158,7 +158,7 @@ export function RateComparison() {
     const interval = setInterval(fetchProtocolRates, 300000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [toFetch]);
 
   if (loading) {
     return (

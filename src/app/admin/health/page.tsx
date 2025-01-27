@@ -5,7 +5,6 @@ import { fetchAllServices, fetchServiceDetails } from "@/lib/utils"
 import type { Service } from "@/lib/types"
 import { ServiceStatus } from "@/components/ServiceStatus"
 import { ServiceDetails } from "@/components/ServiceDetails"
-import { Button } from "@/components/ui/button"
 
 export default function Dashboard() {
   const [services, setServices] = useState<Service[]>([])
@@ -23,7 +22,7 @@ export default function Dashboard() {
       const data = await fetchAllServices()
       setServices(await data.json())
       setError(null)
-    } catch (err) {
+    } catch  {
       setError("Failed to fetch services")
     } finally {
       setLoading(false)
@@ -36,7 +35,7 @@ export default function Dashboard() {
       const data = await fetchServiceDetails(id).then((res) => res.json())
       setSelectedService(data)
       setError(null)
-    } catch (err) {
+    } catch {
       setError("Failed to fetch service details")
     } finally {
       setLoading(false)

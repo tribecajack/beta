@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, Coins, TrendingUp } from 'lucide-react';
+import { Brain, Coins } from 'lucide-react';
 
 export function Body() {
   return (
