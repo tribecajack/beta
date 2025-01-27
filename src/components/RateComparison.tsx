@@ -1,3 +1,6 @@
+
+
+
 "use client"
 
 import { useEffect, useMemo, useState } from 'react';
@@ -96,7 +99,18 @@ export function RateComparison() {
           console.log("Processing item:", item);
           // Get USDC rate directly from token_rates
           const tokenRates = item.reserves;
-          const usdcRate = tokenRates.find((r) => r.symbol == "USDC")!;
+          const usdcRate = tokenRates.find((r) => r.symbol == "USDC");
+          
+          if (!usdcRate) {
+            console.warn(`No USDC rate found for protocol ${item.name}`);
+            return {
+              name: formatProtocolName(item.name) || `Unknown Protocol ${index + 1}`,
+              apy: '0%',
+              tvl: '$0M',
+              risk: 'Low' as const,
+              recommended: false
+            };
+          }
           
           let risk: "Low" | "Medium" | "High";
           if (usdcRate.vault_deposit_risk < 0.33)
